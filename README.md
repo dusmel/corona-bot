@@ -1,4 +1,4 @@
-# CORONA WHATSAPP-BOT LIVE UPDATE
+# Corona WhatApp-Bot Live
 > This is a simple whatsapp bot that gives live update about corona, this project came to idea to help people in drc and rwanda with problem of poor internet.
 
 [![Build Status][travis-image]][travis-url] [![Open Source Love](https://badges.frapsoft.com/os/mit/mit.svg?v=102)](https://github.com/ellerbrock/open-source-badge/)
