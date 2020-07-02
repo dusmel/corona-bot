@@ -1,19 +1,24 @@
 # frozen_string_literal: true
 require_relative "../api"
 require_relative "../helpers/texts"
+require_relative "../constants/keywords"
 
 module V1
   include Text
+  include Keywords
 
   extend self
 
   def call(body)
     user_request = body.split(" ")
     text = get_texts(body)
-    return "⚠️ Language not supported right now" if text[:language] == :swa || text[:language] == :kin
+    return "⚠️ #{LANGUAGES[@current_language].capitalize} not supported right now" if text && (
+      text[:language] == :swa ||
+      text[:language] == :kin
+    )
     if user_request.size == 1
       if text
-        stat = CurrentStatus.country("drc")
+        stat = API.country("drc")
         puts stat
         stat = stat.first
         cases = stat[:cases]
@@ -31,8 +36,8 @@ module V1
       end
     end
 
-    if user_request.size == 2 && text && body.include?("bref")
-      stat = CurrentStatus.summary
+    if text && body.include?("bref")
+      stat = API.summary
       summary_content = <<~END_MESSAGE
         #{text[:summary].capitalize} | #{stat.first[:day]}
           -----------------------------------
@@ -57,7 +62,7 @@ module V1
     end
 
     if user_request.size == 2 && text && !body.include?("bref")
-      stat = CurrentStatus.country(user_request[1])
+      stat = API.country(user_request[1])
       if stat.any?
         stat = stat.first
         cases = stat[:cases]
@@ -94,27 +99,18 @@ module V1
           ```
         END_MESSAGE
       else
-        message.body("I couldn't process your request,
-          please check for typos and try again 😔 or send *help* for more  details")
+        "I couldn't process your request, please check for typos and try again 😔 or send *help* for more  details"
       end
     end
   end
 
   def get_texts(body)
-    keywords = {
-      french: 'statut',
-      english: 'status',
-      swahili: 'hali',
-      kinyarwanda: 'imiterere',
-    }
-    if body.include?(keywords[:english])
-      TEXT[:eng]
-    elsif body.include?(keywords[:french])
-      TEXT[:fr]
-    elsif body.include?(keywords[:kinyarwanda])
-      TEXT[:kin]
-    elsif body.include?(keywords[:swahili])
-      TEXT[:swa]
+    KEYWORDS.each do |language, key|
+      if body.include?(key)
+        @current_language = language
+        return TEXT[language.to_sym]
+      end
     end
+    nil
   end
 end
