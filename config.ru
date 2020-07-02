@@ -4,4 +4,4 @@ Bundler.require
 Envyable.load('./config/env.yml')
 
 require './bot.rb'
-run CoronaBot
+run(CoronaBot)
